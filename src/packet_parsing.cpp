@@ -18,8 +18,8 @@ void PacketParser::packet_parser(const struct pcap_pkthdr *header, const u_char 
 
     parse_Ethernetframe(packet, header->len);
 
-    printf("Timestamp: %s.%.6ld ",timestr,header->ts.tv_usec);
-    printf("Packet Length: %d\n",header->len);
+    printf("\033[1;34mTimestamp: %s.%.6ld\033[0m ",timestr,header->ts.tv_usec);
+    printf("\033[1;34mPacket Length: %d\033[0m\n",header->len);
     for(int i =0 ; i < header->len; i++){
         printf("%02x ",packet[i]);
     }
@@ -50,17 +50,17 @@ void PacketParser::parse_Ethernetframe(const u_char *packet, int packet_len){
     switch(ether_type){
         case 0x0800: // IPv4
             // parse_IPheader(packet + payload_offset);
-            std::cout << "IPv4 packet detected.\n" << std::endl;
+            std::cout << "\033[1;32mIPv4 packet detected.\033[0m\n" << std::endl;
             break;
         case 0x0806: // ARP
-            std::cout << "ARP packet detected.\n" << std::endl;
+            std::cout << "\033[1;32mARP packet detected.\033[0m\n" << std::endl;
             break;
         case 0x86DD: // IPv6
             // parse_IPv6header(packet+payload_offset);
-            std::cout << "IPv6 packet detected.\n" << std::endl;
+            std::cout << "\033[1;32mIPv6 packet detected.\033[0m\n" << std::endl;
             break;
         default : 
-            std::cout << "Unknown Ethernet Type: " << std::hex << ether_type  << "\n" << std::endl;
+            std::cout << "\033[1;31mUnknown Ethernet Type:\033[0m " << std::hex << ether_type  << "\n" << std::endl;
     }
 
 }
