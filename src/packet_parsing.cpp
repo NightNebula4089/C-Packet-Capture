@@ -88,6 +88,8 @@ void PacketParser::parse_Ipv4(const u_char *packet, int packet_len){
     unsigned char version = (byte1 >> 4) && 0x0F;
     unsigned char ihl = byte1 && 0x0F;
 
+    int header_len = ihl*4;
+
     unsigned char byte2 = packet[1];
     unsigned char dscp = (byte2 >> 2) && 0xFF;
     unsigned char ecn = byte2 && 0x03;
@@ -103,6 +105,29 @@ void PacketParser::parse_Ipv4(const u_char *packet, int packet_len){
 
     uint32_t src_ip = ntohl(*(uint32_t *)(packet+12));
     uint32_t dst_ip = ntohl(*(uint32_t *)(packet+16));
+
+    int payload_length = total_length - header_len;
+    const u_char* payload = packet+header_len;
+
+    switch(protocol){
+        case 1 :
+            parse_Icmp(payload,payload_length);
+            break;
+        case 6 : 
+            // parse_Tcp(packet,packet_len);
+            break;
+        case 17 : 
+            // parse_Udp(packet,packet_len);
+            break;
+        case 121 :
+            // parse_Smp(packet,packet_len);
+            break;
+        case 27 :
+            // parse_Rdp(packet,packet_len);
+            break;
+        default :
+            break;
+    }
 
 
     std::cout << "\033[1;33mIPv4 Header:\033[0m\n" << std::endl;
@@ -128,7 +153,6 @@ void PacketParser::parse_Ipv4(const u_char *packet, int packet_len){
  * Parses the IPv6 header for src and dst IP addresses, protocol, and other relevant information.
  */
 void PacketParser::parse_Ipv6(const u_char *packet, int packet_len){
-    // TODO : Implement IPv6 header parsing to extract source/destination IPs, protocol, etc.
 
     if(packet_len < 40){
         printf("Packet too small for IPv6 header\n");
@@ -164,5 +188,20 @@ void PacketParser::parse_Ipv6(const u_char *packet, int packet_len){
     std::cout << "\033[1;31m Source IP :  " << std::hex << src_ip_part1 << ":" << src_ip_part2 << ":" << src_ip_part3 << ":" << src_ip_part4 << "\033[0m\n" << std::endl;
     std::cout << "\033[1;31m Destination IP : " << std::hex << dst_ip_part1 << ":" << dst_ip_part2 << ":" << dst_ip_part3 << ":" << dst_ip_part4 << "\033[0m\n" << std::endl;
 
+}
+
+/**
+ * Parses the ICMP header for type, code, checksum, and other relevant information.
+ */
+void PacketParser::parse_Icmp(const u_char *payload, int payload_len) {
+    // Implementation for ICMP header parsing
+    unsigned char type = payload[0];
+    unsigned char code = payload[1];
+    uint16_t checksum = ntohs(*(uint16_t *)(payload+2));
+
+    uint16_t id = ntohs(*(uint16_t *)(payload + 4));
+    uint16_t sequence = ntohs(*(uint16_t *)(payload + 6));
+
+    printf("\033[1;33mICMP Type: %d, Code : %d, Checksum: 0x%04x, ID: %d, Sequence: %d\033[0m\n", type, code, checksum, id, sequence);
 
 }

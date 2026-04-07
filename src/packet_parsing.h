@@ -11,6 +11,11 @@ class PacketParser{
         void parse_Ethernetframe(const u_char *packet, int packet_len);
         void parse_Ipv4(const u_char* packet, int packet_len);
         void parse_Ipv6(const u_char* packet, int packet_len);
+        void parse_Icmp(const u_char* packet, int packet_len);
+        void parse_Tcp(const u_char* packet, int packet_len);
+        // void parse_Udp(const u_char* packet, int packet_len);
+        //void parse_Smp(const u_char* packet, int packet_len);
+        //void parse_Rdp(const u_char* packet, int packet_len);
     
     private :
         std::string device;
