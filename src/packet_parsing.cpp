@@ -65,7 +65,7 @@ void PacketParser::parse_Ethernetframe(const u_char *packet, int packet_len){
             std::cout << "\033[1;32mIPv6 packet detected.\033[0m\n" << std::endl;
             std::cout << "\033[1;31m Mac Src :  " << std::hex << *(unsigned int*)src_mac << "\033[0m\n" << std::endl;
             std::cout << "\033[1;31m Mac Dst :  " << std::hex << *(unsigned int*)dst_mac << "\033[0m\n" << std::endl;
-            // parse_Ipv6(packet + payload_offset, payload_len);
+            parse_Ipv6(packet + payload_offset, payload_len);
             break;
         default : 
             std::cout << "\033[1;31mUnknown Ethernet Type:\033[0m " << std::hex << ether_type  << "\n" << std::endl;
@@ -78,7 +78,12 @@ void PacketParser::parse_Ethernetframe(const u_char *packet, int packet_len){
  * Parses the IPv4 header for src and dst IP addresses, protocol, and other relevant information.
  */
 void PacketParser::parse_Ipv4(const u_char *packet, int packet_len){
-    // TODO : Implement IPv4 header parsing to extract source/destination IPs, protocol, etc.
+
+    if (packet_len < 20) {
+        printf("Packet too small for IPv4 header\n");
+        return;
+    }
+
     unsigned char byte1 = packet[0];
     unsigned char version = (byte1 >> 4) && 0x0F;
     unsigned char ihl = byte1 && 0x0F;
@@ -99,6 +104,7 @@ void PacketParser::parse_Ipv4(const u_char *packet, int packet_len){
     uint32_t src_ip = ntohl(*(uint32_t *)(packet+12));
     uint32_t dst_ip = ntohl(*(uint32_t *)(packet+16));
 
+
     std::cout << "\033[1;33mIPv4 Header:\033[0m\n" << std::endl;
     std::cout << "\033[1;31m Version :  " << std::dec << (int)version << "\033[0m\n" << std::endl;
     std::cout << "\033[1;31m IHL :  " << std::dec << (int)ihl << "\033[0m\n" << std::endl;
@@ -113,7 +119,8 @@ void PacketParser::parse_Ipv4(const u_char *packet, int packet_len){
     std::cout << "\033[1;31m Header Checksum :  " << std::hex << checksum << "\033[0m\n" << std::endl;
     std::cout << "\033[1;31m Source IP :  " << std  ::dec << ((src_ip >> 24) & 0xFF) << "." << ((src_ip >> 16) & 0xFF) << "." << ((src_ip >> 8) & 0xFF) << "." << (src_ip & 0xFF) << "\033[0m\n" << std::endl;
     std::cout << "\033[1;31m Destination IP :  " << std  ::dec << ((dst_ip >> 24) & 0xFF) << "." << ((dst_ip >> 16) & 0xFF) << "." << ((dst_ip >> 8) & 0xFF) << "." << (dst_ip & 0xFF) << "\033[0m\n" << std::endl;
-    
+
+
 }
 
 
@@ -122,4 +129,40 @@ void PacketParser::parse_Ipv4(const u_char *packet, int packet_len){
  */
 void PacketParser::parse_Ipv6(const u_char *packet, int packet_len){
     // TODO : Implement IPv6 header parsing to extract source/destination IPs, protocol, etc.
+
+    if(packet_len < 40){
+        printf("Packet too small for IPv6 header\n");
+        return;
+    }
+
+    unsigned char byte0 = packet[0];
+    unsigned char byte1 = packet[1];
+    unsigned char byte2 = packet[2];
+    unsigned char byte3 = packet[3];
+    unsigned char version = (byte0 >> 4)&0x0F;
+    unsigned char traffic_class = ((byte0) << 4) || ((byte1 >> 4)&0x0F);
+    uint16_t flow_label = (((uint16_t) byte1 & 0x0F)<<16) || (uint16_t)(byte2 << 8) || (uint16_t) byte3;
+    uint16_t payload_length = ntohs(*(uint16_t *)(packet+4));
+    unsigned char next_header = packet[6];
+    unsigned char hop_limit = packet[7];
+    uint32_t src_ip_part1 = ntohl(*(uint32_t *)(packet+8));
+    uint32_t src_ip_part2 = ntohl(*(uint32_t *)(packet+12));
+    uint32_t src_ip_part3 = ntohl(*(uint32_t *)(packet+16));
+    uint32_t src_ip_part4 = ntohl(*(uint32_t *)(packet+20));
+    uint32_t dst_ip_part1 = ntohl(*(uint32_t *)(packet+24));
+    uint32_t dst_ip_part2 = ntohl(*(uint32_t *)(packet+28));
+    uint32_t dst_ip_part3 = ntohl(*(uint32_t *)(packet+32));
+    uint32_t dst_ip_part4 = ntohl(*(uint32_t *)(packet+36));
+
+    std::cout << "\033[1;33mIPv6 Header:\033[0m\n" << std::endl;
+    std::cout << "\033[1;31m Version :  " << std::dec << (int)version << "\033[0m\n" << std::endl;  
+    std::cout << "\033[1;31m Traffic Class :  " << std::dec << (int)traffic_class << "\033[0m\n" << std::endl;
+    std::cout << "\033[1;31m Flow Label :  " << std::dec << flow_label << "\033[0m\n" << std::endl;
+    std::cout << "\033[1;31m Payload Length :  " << std::dec << payload_length << "\033[0m\n" << std::endl;
+    std::cout << "\033[1;31m Next Header :  " << std::dec << (int)next_header << "\033[0m\n" << std::endl;
+    std::cout << "\033[1;31m Hop Limit :  " << std::dec << (int)hop_limit << "\033[0m\n" << std::endl;
+    std::cout << "\033[1;31m Source IP :  " << std::hex << src_ip_part1 << ":" << src_ip_part2 << ":" << src_ip_part3 << ":" << src_ip_part4 << "\033[0m\n" << std::endl;
+    std::cout << "\033[1;31m Destination IP : " << std::hex << dst_ip_part1 << ":" << dst_ip_part2 << ":" << dst_ip_part3 << ":" << dst_ip_part4 << "\033[0m\n" << std::endl;
+
+
 }

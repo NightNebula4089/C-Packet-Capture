@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
     int opt;
     char errbuf[PCAP_ERRBUF_SIZE];
     
-    while((opt = getopt(argc,argv,"hi::c::")) != -1){
+    while((opt = getopt(argc,argv,"hi:c::")) != -1){
         switch(opt) {
             case 'i' :
                 device = optarg;
